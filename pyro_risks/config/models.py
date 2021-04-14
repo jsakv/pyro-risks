@@ -114,7 +114,7 @@ TEST_SIZE = 0.2
 RANDOM_STATE = 42
 
 RF_PARAMS = {
-    "n_estimators": 510,
+    "n_estimators": 480,
     "min_samples_leaf": 10,
     "max_features": "sqrt",
     "class_weight": "balanced",
