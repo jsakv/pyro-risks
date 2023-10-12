@@ -1,0 +1,62 @@
+[tool.poetry]
+name = "pyrorisks"
+version = "0.1.0a0"
+description = "Data pre-processing pipelines and models for wildfire forecasting and monitoring"
+authors = ["Pyronear <contact@pyronear.org>"]
+license = "Apache-2.0"
+readme = "README.md"
+packages = [{include = "pyro_risks"}]
+classifiers=[
+    "Development Status :: 2 - Pre-Alpha",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+    "Natural Language :: English",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.6",
+    "Programming Language :: Python :: 3.7",
+    "Topic :: Scientific/Engineering",
+    "Topic :: Scientific/Engineering :: Mathematics",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Software Development",
+    "Topic :: Software Development :: Libraries",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+keywords=["data science", "time series", "machine learning"]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+pandas = "^1.1.4"
+rtree = "^0.9.4"
+scipy = "^1.8.1"
+scikit-learn = "^1.1.0"
+numpy = "^1.24.4"
+xarray = "^2023.9.0"
+netcdf4 = "^1.6.4"
+shapely = "^2.0.1"
+imbalanced-learn = "^0.11.0"
+xgboost = "^2.0.0"
+requests = "^2.31.0"
+cdsapi = "^0.6.1"
+python-dotenv = "^1.0.0"
+geopandas = "^0.14.0"
+boto3 = "^1.28.62"
+
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^7.4.2"
+black = "^23.9.1"
+coverage = "^7.3.2"
+pre-commit = "^3.4.0"
+mypy = "^1.6.0"
+ruff = "^0.0.292"
+
+
+[tool.poetry.group.app.dependencies]
+fastapi = "^0.103.2"
+uvicorn = "^0.23.2"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
