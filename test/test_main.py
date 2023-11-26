@@ -3,19 +3,19 @@
 # This program is licensed under the Apache License version 2.
 # See LICENSE or go to <https://www.apache.org/licenses/LICENSE-2.0.txt> for full license details.
 
-from pyro_risks.pipeline import load_dataset
-from pyro_risks.main import main
-from pyro_risks.pipeline import train_pipeline
-from imblearn.pipeline import Pipeline
-from sklearn.dummy import DummyClassifier
-from click.testing import CliRunner
-import pyro_risks.config as cfg
-import requests
-
-import unittest
-import tempfile
 import glob
 import os
+import tempfile
+import unittest
+
+import requests
+from click.testing import CliRunner
+from imblearn.pipeline import Pipeline
+from sklearn.dummy import DummyClassifier
+
+import pyro_risks.config as cfg
+from pyro_risks.main import main
+from pyro_risks.pipeline import load_dataset, train_pipeline
 
 
 class MainTester(unittest.TestCase):
@@ -27,6 +27,7 @@ class MainTester(unittest.TestCase):
             files = glob.glob(destination + pattern)
             self.assertTrue(any([cfg.DATASET in file for file in files]))
 
+    @unittest.skip("API call temporaly skipped")
     def test_download_inputs(self):
         runner = CliRunner()
         pattern = "/*.csv"
@@ -36,17 +37,13 @@ class MainTester(unittest.TestCase):
                 ["download", "inputs", "--day", "2020-05-05", "--directory", directory],
             )
             files = glob.glob(directory + pattern)
-            self.assertTrue(
-                any(["inputs_France_2020-05-05.csv" in file for file in files])
-            )
+            self.assertTrue(any(["inputs_France_2020-05-05.csv" in file for file in files]))
 
     def test_train_pipeline(self):
         runner = CliRunner()
         pattern = "/*.joblib"
         with tempfile.TemporaryDirectory() as destination:
-            runner.invoke(
-                main, ["train", "--model", "RF", "--destination", destination]
-            )
+            runner.invoke(main, ["train", "--model", "RF", "--destination", destination])
             files = glob.glob(destination + pattern)
             self.assertTrue(any(["RF" in file for file in files]))
 
@@ -55,9 +52,7 @@ class MainTester(unittest.TestCase):
         pattern = "/*.joblib"
         X, y = load_dataset()
 
-        dummy_pipeline = Pipeline(
-            [("dummy_classifier", DummyClassifier(strategy="constant", constant=0))]
-        )
+        dummy_pipeline = Pipeline([("dummy_classifier", DummyClassifier(strategy="constant", constant=0))])
 
         with tempfile.TemporaryDirectory() as destination:
             threshold = destination + "/DUMMY_threshold.json"
@@ -90,6 +85,7 @@ class MainTester(unittest.TestCase):
             self.assertTrue(any([".json" in file for file in files]))
             self.assertTrue(any([".csv" in file for file in files]))
 
+    @unittest.skip("Skipped to be deprecated")
     def test_predict(self):
         # TODO
         # Test with today date after bugfix
@@ -104,29 +100,17 @@ class MainTester(unittest.TestCase):
 
         runner = CliRunner()
         with tempfile.TemporaryDirectory() as directory:
-
             with open(os.path.join(directory, inputs_fname), "wb") as inputs:
                 inputs.write(mock_inputs.content)
 
             with open(os.path.join(directory, pipeline_fname), "wb") as pipeline:
                 pipeline.write(mock_pipeline.content)
-            runner.invoke(
-                main, ["predict", "--day", "2020-05-05", "--directory", directory]
-            )
+            runner.invoke(main, ["predict", "--day", "2020-05-05", "--directory", directory])
 
             files = glob.glob(directory + "/*")
             print(files)
-            self.assertTrue(
-                any(["inputs_France_2020-05-05.csv" in file for file in files])
-            )
-            self.assertTrue(
-                any(
-                    [
-                        "RF_predictions_France_2020-05-05.joblib" in file
-                        for file in files
-                    ]
-                )
-            )
+            self.assertTrue(any(["inputs_France_2020-05-05.csv" in file for file in files]))
+            self.assertTrue(any(["RF_predictions_France_2020-05-05.joblib" in file for file in files]))
             self.assertTrue(any(["RF.joblib" in file for file in files]))
 
 

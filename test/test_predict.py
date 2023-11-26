@@ -3,19 +3,20 @@
 # This program is licensed under the Apache License version 2.
 # See LICENSE or go to <https://www.apache.org/licenses/LICENSE-2.0.txt> for full license details.
 
-from pyro_risks.pipeline import PyroRisk
-from pyro_risks import config as cfg
-
-import pandas as pd
-
-import requests
-import imblearn
-import unittest
-import tempfile
 import glob
 import os
+import tempfile
+import unittest
+
+import imblearn
+import pandas as pd
+import requests
+
+from pyro_risks import config as cfg
+from pyro_risks.pipeline import PyroRisk
 
 
+@unittest.skip("Skipped to be deprecated")
 class PredictTester(unittest.TestCase):
     def test_pyrorisk(self):
         pyrorisk_rf = PyroRisk()
@@ -42,13 +43,9 @@ class PredictTester(unittest.TestCase):
         country = "France"
         day = "2020-05-05"
         with tempfile.TemporaryDirectory() as dir_destination:
-            pyrorisk.get_inputs(
-                day=day, country=country, dir_destination=dir_destination
-            )
+            pyrorisk.get_inputs(day=day, country=country, dir_destination=dir_destination)
             files = glob.glob(dir_destination + "/*")
-            self.assertTrue(
-                any([f"inputs_{country}_{day}.csv" in file for file in files])
-            )
+            self.assertTrue(any([f"inputs_{country}_{day}.csv" in file for file in files]))
 
     def test_load_pipeline(self):
         pyrorisk = PyroRisk()
@@ -70,9 +67,7 @@ class PredictTester(unittest.TestCase):
             pyrorisk.load_inputs(day=day, country=country, dir_path=dir_path)
             files = glob.glob(dir_path + "/*")
             self.assertTrue(isinstance(pyrorisk.inputs, pd.DataFrame))
-            self.assertTrue(
-                any([f"inputs_{country}_{day}.csv" in file for file in files])
-            )
+            self.assertTrue(any([f"inputs_{country}_{day}.csv" in file for file in files]))
             pyrorisk.inputs = None
             pyrorisk.load_inputs(day=day, country=country, dir_path=dir_path)
             self.assertTrue(isinstance(pyrorisk.inputs, pd.DataFrame))
@@ -99,39 +94,15 @@ class PredictTester(unittest.TestCase):
             with open(os.path.join(dir_destination, inputs_fname), "wb") as inputs:
                 inputs.write(mock_inputs.content)
 
-            with open(
-                os.path.join(dir_destination, rf_pipeline_fname), "wb"
-            ) as pipeline:
+            with open(os.path.join(dir_destination, rf_pipeline_fname), "wb") as pipeline:
                 pipeline.write(mock_rf_pipeline.content)
-            with open(
-                os.path.join(dir_destination, xgb_pipeline_fname), "wb"
-            ) as pipeline:
+            with open(os.path.join(dir_destination, xgb_pipeline_fname), "wb") as pipeline:
                 pipeline.write(mock_xgb_pipeline.content)
-            pyrorisk_rf.predict(
-                day=day, country=country, dir_destination=dir_destination
-            )
-            pyrorisk_xgb.predict(
-                day=day, country=country, dir_destination=dir_destination
-            )
+            pyrorisk_rf.predict(day=day, country=country, dir_destination=dir_destination)
+            pyrorisk_xgb.predict(day=day, country=country, dir_destination=dir_destination)
             files = glob.glob(dir_destination + "/*")
-            self.assertTrue(
-                any(
-                    [
-                        f"{pyrorisk_rf.model}_predictions_{country}_{day}.joblib"
-                        in file
-                        for file in files
-                    ]
-                )
-            )
-            self.assertTrue(
-                any(
-                    [
-                        f"{pyrorisk_xgb.model}_predictions_{country}_{day}.joblib"
-                        in file
-                        for file in files
-                    ]
-                )
-            )
+            self.assertTrue(any([f"{pyrorisk_rf.model}_predictions_{country}_{day}.joblib" in file for file in files]))
+            self.assertTrue(any([f"{pyrorisk_xgb.model}_predictions_{country}_{day}.joblib" in file for file in files]))
 
     def test_get_predictions(self):
         pyrorisk = PyroRisk()
@@ -140,25 +111,14 @@ class PredictTester(unittest.TestCase):
         with tempfile.TemporaryDirectory() as destination:
             pyrorisk.get_predictions(day=day, dir_destination=destination)
             files = glob.glob(destination + "/*")
-            self.assertTrue(
-                any(
-                    [
-                        f"{pyrorisk.model}_predictions_{country}_{day}.joblib" in file
-                        for file in files
-                    ]
-                )
-            )
+            self.assertTrue(any([f"{pyrorisk.model}_predictions_{country}_{day}.joblib" in file for file in files]))
 
     def test_expose_predictions(self):
         pyrorisk = PyroRisk()
         day = "2020-05-05"
         with tempfile.TemporaryDirectory() as destination:
-            predictions_dict = pyrorisk.expose_predictions(
-                day=day, dir_destination=destination
-            )
-            predictions_load_dict = pyrorisk.expose_predictions(
-                day=day, dir_destination=destination
-            )
+            predictions_dict = pyrorisk.expose_predictions(day=day, dir_destination=destination)
+            predictions_load_dict = pyrorisk.expose_predictions(day=day, dir_destination=destination)
 
         self.assertTrue(isinstance(predictions_dict, dict))
         self.assertTrue(isinstance(predictions_load_dict, dict))

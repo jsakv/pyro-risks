@@ -3,13 +3,14 @@
 # This program is licensed under the Apache License version 2.
 # See LICENSE or go to <https://www.apache.org/licenses/LICENSE-2.0.txt> for full license details.
 
-from typing import List, Union, Optional, Tuple, Callable
+from typing import Callable, List, Optional, Tuple, Union
+
+import numpy as np
+import pandas as pd
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.impute import SimpleImputer
-from .utils import check_xy, check_x
 
-import pandas as pd
-import numpy as np
+from .utils import check_x, check_xy
 
 
 class TargetDiscretizer(BaseEstimator):
@@ -24,15 +25,12 @@ class TargetDiscretizer(BaseEstimator):
     """
 
     def __init__(self, discretizer: Callable) -> None:
-
         if callable(discretizer):
             self.discretizer = discretizer
         else:
             raise TypeError(f"{self.__class__.__name__} constructor expect a callable")
 
-    def fit_resample(
-        self, X: pd.DataFrame, y: pd.Series
-    ) -> Tuple[pd.DataFrame, pd.Series]:
+    def fit_resample(self, X: pd.DataFrame, y: pd.Series) -> Tuple[pd.DataFrame, pd.Series]:
         """Discretize the target variable.
 
         The `fit_resample` method allows for discretizing the target variable.
@@ -67,7 +65,6 @@ class CategorySelector(BaseEstimator):
     """
 
     def __init__(self, variable: str, category: Union[str, list]) -> None:
-
         self.variable = variable
         # Catch or prevent key errors
         if isinstance(category, str):
@@ -75,13 +72,9 @@ class CategorySelector(BaseEstimator):
         elif isinstance(category, list):
             self.category = category
         else:
-            raise TypeError(
-                f"{self.__class__.__name__} constructor category argument expect a string or a list"
-            )
+            raise TypeError(f"{self.__class__.__name__} constructor category argument expect a string or a list")
 
-    def fit_resample(
-        self, X: pd.DataFrame, y: Optional[pd.Series] = None
-    ) -> Tuple[pd.DataFrame, pd.Series]:
+    def fit_resample(self, X: pd.DataFrame, y: Optional[pd.Series] = None) -> Tuple[pd.DataFrame, pd.Series]:
         """Select features and targets rows.
 
         The `fit_resample` method allows for selecting the features and target
@@ -120,7 +113,6 @@ class Imputer(SimpleImputer):
         missing_values: the placeholder for the missing values.
         strategy: the imputation strategy (mean, median, most_frequent, constant).
         fill_value: fill_value is used to replace all occurrences of missing_values (default to 0).
-        verbose: controls the verbosity of the imputer.
         copy: If True, a copy of X will be created.
         add_indicator: If True, a MissingIndicator transform will stack onto output of the imputer’s transform.
     """
@@ -131,7 +123,6 @@ class Imputer(SimpleImputer):
         missing_values: Union[int, float, str] = np.nan,
         strategy: str = "mean",
         fill_value: float = None,
-        verbose: int = 0,
         copy: bool = True,
         add_indicator: bool = False,
     ) -> None:
@@ -139,7 +130,6 @@ class Imputer(SimpleImputer):
             missing_values=missing_values,
             strategy=strategy,
             fill_value=fill_value,
-            verbose=verbose,
             copy=copy,
             add_indicator=add_indicator,
         )
@@ -225,25 +215,15 @@ class LagTransformer(BaseEstimator, TransformerMixin):
         X = check_x(X)
 
         if X[self.date_column].dtypes != "datetime64[ns]":
-            raise TypeError(
-                f"{self.__class__.__name__} transforme methods expect date_column of type datetime64[ns]"
-            )
+            raise TypeError(f"{self.__class__.__name__} transforme methods expect date_column of type datetime64[ns]")
 
         for var in self.columns:
             for dep in X[self.zone_column].unique():
-                tmp = X[X[self.zone_column] == dep][[self.date_column, var]].set_index(
-                    self.date_column
-                )
+                tmp = X[X[self.zone_column] == dep][[self.date_column, var]].set_index(self.date_column)
                 tmp1 = tmp.copy()
-                tmp1 = tmp1.join(
-                    tmp.shift(periods=1, freq="D"), rsuffix="_lag1", how="left"
-                )
-                tmp1 = tmp1.join(
-                    tmp.shift(periods=3, freq="D"), rsuffix="_lag3", how="left"
-                )
-                tmp1 = tmp1.join(
-                    tmp.shift(periods=7, freq="D"), rsuffix="_lag7", how="left"
-                )
+                tmp1 = tmp1.join(tmp.shift(periods=1, freq="D"), rsuffix="_lag1", how="left")
+                tmp1 = tmp1.join(tmp.shift(periods=3, freq="D"), rsuffix="_lag3", how="left")
+                tmp1 = tmp1.join(tmp.shift(periods=7, freq="D"), rsuffix="_lag7", how="left")
                 new_vars = [var + "_lag1", var + "_lag3", var + "_lag7"]
                 X.loc[X[self.zone_column] == dep, new_vars] = tmp1[new_vars].values
         return X
@@ -261,10 +241,7 @@ class FeatureSelector(BaseEstimator, TransformerMixin):
         threshold: columns on which to add lags
     """
 
-    def __init__(
-        self, exclude: List[str], method: str = "pearson", threshold: float = 0.15
-    ) -> None:
-
+    def __init__(self, exclude: List[str], method: str = "pearson", threshold: float = 0.15) -> None:
         self.exclude = exclude
         self.method = method
         self.threshold = threshold
@@ -283,15 +260,9 @@ class FeatureSelector(BaseEstimator, TransformerMixin):
         """
         X, y = check_xy(X, y)
         self.target_correlation = (
-            pd.concat([X, y], axis=1)
-            .corr(method=self.method)
-            .loc[y.name]
-            .apply(abs)
-            .sort_values(ascending=False)
+            pd.concat([X, y], axis=1).corr(method=self.method).loc[y.name].apply(abs).sort_values(ascending=False)
         )
-        self.target_correlation = self.target_correlation[
-            self.target_correlation.index != y.name
-        ]
+        self.target_correlation = self.target_correlation[self.target_correlation.index != y.name]
 
         return self
 
@@ -324,7 +295,6 @@ class FeatureSubsetter(BaseEstimator, TransformerMixin):
     """
 
     def __init__(self, columns: List[str]) -> None:
-
         self.columns = columns
 
     def fit(self, X: pd.DataFrame, y: Optional[pd.Series] = None) -> "FeatureSubsetter":
