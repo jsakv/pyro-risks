@@ -60,3 +60,53 @@ uvicorn = "^0.23.2"
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.ruff]
+ignore = [
+    "F401",  # line too long, handled by black
+    "E402",  # do not perform function calls in argument defaults
+    "E265",  # raise from
+    "F403",  # too complex
+    "F821",  # list comprehension to list()
+    "W605",  # list comprehension to list()
+]
+exclude = [".git", "venv", "docs", "build"]
+line-length = 120
+target-version = "py39"
+preview = true
+
+[tool.mypy]
+python_version = "3.9"
+mypy_path = "src/"
+files = ["pyro_risks/*.py", "app/*.py"]
+show_error_codes = true
+pretty = true
+
+[[tool.mypy.overrides]]
+module = [
+    "dotenv",
+    "xarray",
+    "pandas",
+    "sklearn",
+    "sklearn",
+    "sklearn",
+    "sklearn",
+    "xgboost",
+    "numpy",
+    "geopandas",
+    "cdsapi",
+    "urllib3",
+    "joblib",
+    "imblearn",
+    "matplotlib",
+    "plot_metric",
+    "shapely",
+    "scipy",
+    "netCDF4",
+    "pyro_risks.version"
+]
+ignore_missing_imports = true
+
+[tool.black]
+line-length = 120
+target-version = ['py39']
