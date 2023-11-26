@@ -110,6 +110,9 @@ module = [
 ]
 ignore_missing_imports = true
 
+[tool.coverage.run]
+source = pyro_risks
+
 [tool.black]
 line-length = 120
 target-version = ['py39']
