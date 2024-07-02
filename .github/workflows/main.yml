@@ -42,10 +42,8 @@ jobs:
           architecture: x64
       - name: Install package
         run: |
-          brew install spatialindex
-          python -m pip install --upgrade pip
-          pip install Rtree>=0.9.4
-          pip install -e .
+          make mac-pre-install-geopandas
+          poetry install 
 
   pkg-test:
     runs-on: ubuntu-latest
@@ -60,8 +58,8 @@ jobs:
       - name: Cache python modules
         uses: actions/cache@v2
         with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pkg-deps-${{ hashFiles('requirements.txt') }}-${{ hashFiles('**/*.py') }}
+          path: ~/.cache/poetry
+          key: ${{ runner.os }}-pkg-deps-${{ hashFiles('poetry.lock') }}-${{ hashFiles('**/*.py') }}
           restore-keys: |
             ${{ runner.os }}-pkg-deps-${{ hashFiles('requirements.txt') }}-
             ${{ runner.os }}-pkg-deps-
